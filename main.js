@@ -1,7 +1,3 @@
-// sprint 6 12/12/2019
-
-$("#atlwdg-trigger").hide();
-
 var Config = Config || {};
 
 Config.ContentTypes = Config.ContentTypes || []
@@ -27,7 +23,7 @@ Config.ContentTypes.push(
                             var taskId = GetUrlKeyValue("ID");
                             var btn = $("input[value='Send to approve']");
                             var demandId = $("select[Title^='Demand']")[0].value;
-                            debugger;
+                            var currentStatus;
                             if (!isValidForm) {
                                 debugger;
                                 $.ajax({
@@ -38,17 +34,31 @@ Config.ContentTypes.push(
                                     }
                                 })
                                 .done(function (data, textStatus, jqXHR) {
-                                    var currentStatus = data.d.results[0].CheckoutUserId;
-                                    console.log(currentStatus)
-                                    console.log(window.isValidForm);
+                                    currentStatus = data.d.results[0].CheckoutUserId;
                                     debugger;
-                                    
+                                    if(currentStatus == null){
+                                        alert("TRIGGER");
+                                        debugger;
+                                        window.isValidForm = true;
+                                        return window.isValidForm;
+                                    }
+                                    else{
+                                        alert("Oh no your doc is in action");
+                                    }
+                                    console.log("first log " + window.isValidForm)
 
                                 })
                                 .fail(function (jqXHR, textStatus, errorThrown) {
                                     debugger;
                                     alert("Error retrieving information from FRD Task list: " + jqXHR.responseText);
                                 });
+                                console.log("second log " + window.isValidForm)
+
+                            }
+                            else{
+                            var result = window.isValidForm;
+                            window.isValidForm = false;
+                            return result;
                             }
                         }
                     }    
