@@ -21,9 +21,10 @@ Config.ContentTypes.push(
                         Function: function () {
                             window.isValidForm = window.isValidForm || false;
                             var taskId = GetUrlKeyValue("ID");
-                            var btn = $("input[value='Send to approve']");
+                            var btn = $("input[value='Send to line manager']");
                             var demandId = $("select[Title^='Demand']")[0].value;
                             var currentStatus;
+                            
                             if (!isValidForm) {
                                 debugger;
                                 $.ajax({
@@ -31,29 +32,28 @@ Config.ContentTypes.push(
                                     type: "GET",
                                     headers: {
                                         "Accept": "application/json; odata=verbose"
-                                    }
-                                })
-                                .done(function (data, textStatus, jqXHR) {
-                                    currentStatus = data.d.results[0].CheckoutUserId;
-                                    debugger;
-                                    if(currentStatus == null){
-                                        alert("TRIGGER");
+                                    },
+                                    success:(function (data, textStatus, jqXHR) {
                                         debugger;
-                                        window.isValidForm = true;
-                                        return window.isValidForm;
-                                    }
-                                    else{
-                                        alert("Oh no your doc is in action");
-                                    }
-                                    console.log("first log " + window.isValidForm)
+                                        currentStatus = data.d.results[0].CheckoutUserId;
+                                        debugger;
+                                        console.log("first log ")
+                                        if(currentStatus == null){
+                                            window.isValidForm = true; 
+                                            $(btn).click(); 
+                                            return true;
+                                        }
+                                        else{
+                                            debugger;
+                                            window.showCreateFRDDialog(); 
+                                        }
+                                    }) 
 
                                 })
                                 .fail(function (jqXHR, textStatus, errorThrown) {
                                     debugger;
-                                    alert("Error retrieving information from FRD Task list: " + jqXHR.responseText);
+                                    alert("Error retrieving information from PTR list: " + jqXHR.responseText);
                                 });
-                                console.log("second log " + window.isValidForm)
-
                             }
                             else{
                             var result = window.isValidForm;
@@ -62,7 +62,36 @@ Config.ContentTypes.push(
                             }
                         }
                     }    
-                ]
+                ],
+                OnLoad: {
+                    Function: function () {
+                        requirejs(["bootstrap.min"], function () {
+                            $("body").attr("ng-controller", "CreateFRD as main");
+                            angular.module("app", ["ngDialog", "angular.css.injector"])
+                                .controller("CreateFRD", function ($scope, ngDialog, cssInjector) {
+                                    cssInjector.add("/Style Library/Styles/ngDialog.min.css");
+                                    cssInjector.add("/Style Library/Styles/ngDialog-theme-plain.min.css");
+                                    cssInjector.add("/Style Library/Styles/ngDialog-custom-width.css");
+                                    cssInjector.add("/Style Library/Styles/approve-create-frd.css");
+                                    window.showCreateFRDDialog = function (dI, aN) {
+                                        var newScope = $scope.$new();
+                                        newScope.demandId = dI;
+                                        newScope.analyst = aN;
+                                        newScope.close = function () { debugger; window.isValidForm = false; return true; }
+                                        ngDialog.open({
+                                            scope: newScope,
+                                            template: '/Style Library/templates/ptr.checkin.component.html',
+                                            className: 'ngdialog-theme-plain custom-width',
+                                            cache: false
+                                        });
+                                    }
+                                })
+
+                            angular.bootstrap(document, ['app']);
+                        });
+                    }
+                }
+                
             }
         ]
     }
