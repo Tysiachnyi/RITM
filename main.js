@@ -2,8 +2,6 @@ var Config = Config || {};
 
 Config.ContentTypes = Config.ContentTypes || []
 
-debugger;
-
 
 Config.ContentTypes.push(
     {
@@ -24,6 +22,25 @@ Config.ContentTypes.push(
                             var btn = $("input[value='Send to line manager']");
                             var demandId = $("select[Title^='Demand']")[0].value;
                             var currentStatus;
+                            var userid= _spPageContextInfo.userId;
+                            var requestUri = _spPageContextInfo.webAbsoluteUrl + "/_api/web/getuserbyid(" + userid + ")";
+                            var requestHeaders = { "accept" : "application/json;odata=verbose" };
+                            var loginName;
+                            $.ajax({
+                                url : requestUri,
+                                contentType : "application/json;odata=verbose",
+                                headers : requestHeaders,
+                                success : onSuccess,
+                                error : onError
+                                });
+                                function onSuccess(data, request){
+                                loginName = data.d.Title;
+                                return loginName;
+                                }
+            
+                                function onError(error) {
+                                console.log("error");
+                                }
                             
                             if (!isValidForm) {
                                 debugger;
@@ -44,8 +61,9 @@ Config.ContentTypes.push(
                                             return true;
                                         }
                                         else{
+                                            console.log(loginName);
                                             debugger;
-                                            window.showCreateFRDDialog(); 
+                                            window.showCreateFRDDialog(loginName); 
                                         }
                                     }) 
 
@@ -73,10 +91,9 @@ Config.ContentTypes.push(
                                     cssInjector.add("/Style Library/Styles/ngDialog-theme-plain.min.css");
                                     cssInjector.add("/Style Library/Styles/ngDialog-custom-width.css");
                                     cssInjector.add("/Style Library/Styles/approve-create-frd.css");
-                                    window.showCreateFRDDialog = function (dI, aN) {
+                                    window.showCreateFRDDialog = function (uN) {
                                         var newScope = $scope.$new();
-                                        newScope.demandId = dI;
-                                        newScope.analyst = aN;
+                                        newScope.userName = uN
                                         newScope.close = function () { debugger; window.isValidForm = false; return true; }
                                         ngDialog.open({
                                             scope: newScope,
